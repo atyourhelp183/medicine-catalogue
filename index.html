@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Medication Catalogue</title>
+<style>
+:root{--bg:#f6f8fa;--card:#fff;--tx:#14213d;--mu:#5b6b82;--ac:#0f766e;--bd:#e1e7ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1621;--card:#16212f;--tx:#e8eef6;--mu:#93a4ba;--ac:#2dd4bf;--bd:#243447}}
+:root[data-theme="dark"]{--bg:#0e1621;--card:#16212f;--tx:#e8eef6;--mu:#93a4ba;--ac:#2dd4bf;--bd:#243447}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:28px 16px 12px;max-width:1100px;margin:auto}
+h1{margin:0;font-size:1.7rem}header p{margin:4px 0 0;color:var(--mu)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:10px 16px;max-width:1100px;margin:auto;z-index:2}
+input{width:100%;padding:12px 14px;font-size:16px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px}
+.chip{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:6px 12px;border-radius:99px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+main{max-width:1100px;margin:auto;padding:0 16px 30px}
+.cnt{color:var(--mu);font-size:13px;margin:8px 0}
+h2{font-size:1.05rem;margin:22px 0 8px;color:var(--ac)}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px}
+.c b{display:block}.c i{font-style:normal;color:var(--mu);font-size:13px;display:block;margin:2px 0 6px}
+.s{display:inline-block;background:color-mix(in srgb,var(--ac) 14%,transparent);color:var(--ac);border-radius:6px;padding:2px 8px;font-size:12.5px;margin:2px 0}
+footer{max-width:1100px;margin:auto;padding:0 16px 30px;color:var(--mu);font-size:12.5px}
+</style></head><body>
+<header><h1>💊 Medication Catalogue</h1><p>Search by drug, brand, form or strength</p></header>
+<div class="bar"><input id="q" type="search" placeholder="Search e.g. lisinopril, Zoloft, inhaler…"><div class="chips" id="chips"></div></div>
+<main><div class="cnt" id="cnt"></div><div id="out"></div></main>
+<footer>For general reference only. Not medical advice; confirm strengths and use with a doctor or pharmacist.</footer>
+<script>
+const D={
+"Heart / BP / Cardiovascular":`Lisinopril (Prinivil, Zestril)|Tablet, oral solution|2.5, 5, 10, 20, 40 mg
+Lisinopril/HCTZ (Prinzide, Zestoretic)|Tablet|10/12.5, 20/12.5, 20/25 mg
+Enalapril (Vasotec)|Tablet, oral solution|2.5, 5, 10, 20 mg
+Ramipril (Altace)|Capsule|1.25, 2.5, 5, 10 mg
+Losartan (Cozaar)|Tablet|25, 50, 100 mg
+Olmesartan (Benicar)|Tablet|5, 20, 40 mg
+Valsartan (Diovan)|Tablet, oral solution|40, 80, 160, 320 mg
+Atenolol (Tenormin)|Tablet|25, 50, 100 mg
+Metoprolol tartrate (Lopressor)|Tablet, injection|25, 50, 100 mg; inj 5 mg/5 mL
+Metoprolol succinate (Toprol XL)|ER tablet|25, 50, 100, 200 mg
+Nebivolol (Bystolic)|Tablet|2.5, 5, 10, 20 mg
+Propranolol (Inderal)|Tablet, ER capsule, solution|10, 20, 40, 60, 80, 90 mg; ER 60, 80, 120, 160 mg
+Carvedilol (Coreg)|Tablet, ER capsule|3.125, 6.25, 12.5, 25 mg; ER 10, 20, 40, 80 mg
+Nifedipine XL (Procardia XL)|ER tablet|30, 60, 90 mg
+Amlodipine (Norvasc)|Tablet|2.5, 5, 10 mg
+Amlodipine/benazepril (Lotrel)|Capsule|2.5/10, 5/10, 5/20, 5/40, 10/20, 10/40 mg
+Diltiazem (Cardizem CD)|Tablet/capsule, ER capsule, injection|ER 120, 180, 240, 300, 360, 420 mg; IV 25 mg/5 mL
+Hydrochlorothiazide (Microzide)|Tablet, capsule|12.5, 25, 50 mg
+Metolazone (Zaroxolyn)|Tablet|2.5, 5, 10 mg
+Furosemide (Lasix)|Tablet, solution, injection|20, 40, 80 mg; inj 10 mg/mL
+Torsemide (Demadex)|Tablet|5, 10, 20, 100 mg
+Bumetanide (Bumex)|Tablet, injection|0.5, 1, 2 mg; inj 0.25 mg/mL
+Spironolactone (Aldactone)|Tablet, suspension|25, 50, 100 mg
+Pravastatin (Pravachol)|Tablet|10, 20, 40, 80 mg
+Simvastatin (Zocor)|Tablet|5, 10, 20, 40, 80 mg
+Simvastatin/ezetimibe (Vytorin)|Tablet|10/10, 10/20, 10/40, 10/80 mg
+Atorvastatin (Lipitor)|Tablet|10, 20, 40, 80 mg
+Rosuvastatin (Crestor)|Tablet|5, 10, 20, 40 mg
+Fenofibrate (Tricor)|Tablet, capsule|48, 145 mg
+Gemfibrozil (Lopid)|Tablet|600 mg
+Omega-3 acid ethyl esters (Lovaza)|Capsule|1 g
+Niacin (Niaspan)|ER tablet|500, 750, 1000 mg
+Ezetimibe (Zetia)|Tablet|10 mg
+Colesevelam (Welchol)|Tablet, suspension|625 mg; 3.75 g packets
+Aspirin|Tablet, chewable|81, 162, 325 mg
+Aspirin/Dipyridamole (Aggrenox)|ER capsule|25/200 mg
+Clopidogrel (Plavix)|Tablet|75, 300 mg
+Prasugrel (Effient)|Tablet|5, 10 mg
+Ticagrelor (Brilinta)|Tablet|60, 90 mg
+Warfarin (Coumadin)|Tablet|1, 2, 2.5, 3, 4, 5, 6, 7.5, 10 mg
+Enoxaparin (Lovenox)|Prefilled syringe|30, 40, 60, 80, 100, 120, 150 mg
+Dabigatran (Pradaxa)|Capsule|75, 110, 150 mg
+Rivaroxaban (Xarelto)|Tablet|2.5, 10, 15, 20 mg
+Apixaban (Eliquis)|Tablet|2.5, 5 mg
+Nitroglycerin (Nitrostat)|Sublingual tablet, spray|0.3, 0.4, 0.6 mg
+Isosorbide mononitrate (Imdur)|ER tablet|30, 60, 120 mg
+Ranolazine (Ranexa)|ER tablet|500, 1000 mg
+Amiodarone (Cordarone, Pacerone)|Tablet, injection|100, 200, 400 mg; inj 50 mg/mL
+Digoxin (Lanoxin)|Tablet, solution, injection|62.5, 125, 250 mcg; inj 0.25 mg/mL`,
+"Asthma / Breathing":`Fluticasone (Flovent)|Inhaler|44, 110, 220 mcg/actuation
+Budesonide (Pulmicort)|Inhalation suspension, inhaler|0.25, 0.5 mg/2 mL; 90, 180 mcg/act
+Salmeterol (Serevent)|Inhalation powder|50 mcg
+Formoterol (Foradil)|Inhalation capsule|12 mcg
+Fluticasone/salmeterol (Advair)|Inhaler / powder|100/50, 250/50, 500/50 mcg; HFA 45/21, 115/21, 230/21
+Budesonide/formoterol (Symbicort)|MDI|80/4.5, 160/4.5 mcg
+Albuterol (Ventolin, Proventil)|Inhaler, nebulizer, tablet|90 mcg/act; 0.63, 1.25, 2.5 mg/3 mL; tab 2, 4 mg
+Levalbuterol (Xopenex)|Inhaler, nebulizer|45 mcg/act; 0.31, 0.63, 1.25 mg/3 mL
+Ipratropium (Atrovent)|Inhaler, nebulizer|17 mcg/act; 0.02%
+Tiotropium (Spiriva)|Inhalation capsule/inhaler|18 mcg; 1.25 or 2.5 mcg/act
+Albuterol/Ipratropium (Combivent, DuoNeb)|Inhaler, nebulizer|20/100 mcg; 0.5/2.5 mg per 3 mL
+Montelukast (Singulair)|Tablet, chewable, granules|10 mg; chew 4, 5 mg; granules 4 mg`,
+"Acid Reflux / Heartburn":`Omeprazole (Prilosec)|DR capsule/tablet, suspension|10, 20, 40 mg
+Esomeprazole (Nexium)|DR capsule/tablet, granules, injection|20, 40 mg
+Pantoprazole (Protonix)|DR tablet, injection|20, 40 mg
+Lansoprazole (Prevacid)|DR capsule, ODT|15, 30 mg
+Dexlansoprazole (Dexilant)|DR capsule|30, 60 mg`,
+"Stomach / Digestion / Bowel":`Famotidine (Pepcid)|Tablet, chewable, suspension, injection|10, 20, 40 mg; inj 10 mg/mL
+Ranitidine (Zantac)|Tablet, syrup (historical)|75, 150, 300 mg
+Senna (Senokot)|Tablet, syrup|8.6 mg
+Bisacodyl (Dulcolax)|Tablet, suppository|5 mg tab; 10 mg supp
+Docusate (Colace)|Capsule, liquid, tablet|50, 100, 250 mg
+Senna/docusate (Senokot-S)|Tablet|8.6/50 mg
+PEG 3350 (MiraLAX)|Powder|17 g/dose
+PEG 3350 + electrolytes (GoLYTELY)|Powder|236 g per 4-L solution
+Dicyclomine (Bentyl)|Capsule, tablet, solution, injection|10, 20 mg; inj 20 mg/2 mL
+Loperamide (Imodium)|Tablet, capsule, liquid|2 mg
+Diphenoxylate/atropine (Lomotil)|Tablet, liquid|2.5/0.025 mg
+Mesalamine (Asacol-HD, Delzicol)|DR/ER tablet, capsule, rectal|400, 800 mg; varies`,
+"Nausea / Vomiting":`Ondansetron (Zofran)|Tablet, ODT, solution, injection|4, 8, 24 mg; inj 2 mg/mL
+Prochlorperazine (Compazine)|Tablet, suppository, injection|5, 10 mg; supp 25 mg; inj 5 mg/mL
+Promethazine (Phenergan)|Tablet, suppository, syrup, injection|12.5, 25, 50 mg
+Metoclopramide (Reglan)|Tablet, solution, injection|5, 10 mg; inj 5 mg/mL`,
+"Kidney-related":`Cinacalcet (Sensipar)|Tablet, granules|30, 60, 90 mg
+Sevelamer carbonate (Renvela)|Tablet, powder|800 mg; packets 0.8 g, 2.4 g
+Potassium chloride (Klor-Con)|ER tablet, capsule, liquid, powder|8, 10, 15, 20 mEq
+Epoetin alfa (Epogen, Procrit)|Injection|2,000–40,000 units/mL
+Darbepoetin (Aranesp)|Injection|10, 25, 40, 60, 100, 150, 200, 300, 500 mcg`,
+"Migraine":`Sumatriptan (Imitrex)|Tablet, nasal spray, injection|25, 50, 100 mg; nasal 5, 20 mg; inj 6 mg/0.5 mL
+Eletriptan (Relpax)|Tablet|20, 40 mg
+Rizatriptan (Maxalt)|Tablet, ODT|5, 10 mg
+Butalbital/APAP/caffeine (Fioricet)|Tablet, capsule|50/300/40 mg
+Butalbital/aspirin/caffeine (Fiorinal)|Capsule, tablet|50/325/40 mg`,
+"Seizures / Epilepsy":`Phenytoin (Dilantin)|Capsule, chewable, suspension, injection|30, 100 mg; susp 125 mg/5 mL
+Valproic acid (Depakote, Depakene)|Tablet, ER, capsule, syrup|125, 250, 500 mg; liquid 250 mg/5 mL
+Lamotrigine (Lamictal)|Tablet, chewable/dispersible, ODT|25, 50, 100, 150, 200 mg
+Carbamazepine (Tegretol, Carbatrol)|Tablet, ER, suspension|100, 200, 400 mg; susp 100 mg/5 mL
+Oxcarbazepine (Trileptal)|Tablet, suspension|150, 300, 600 mg; susp 300 mg/5 mL
+Levetiracetam (Keppra)|Tablet, ER, solution, injection|250, 500, 750, 1000 mg; soln 100 mg/mL`,
+"Moderate / Severe Pain":`Morphine (MS Contin)|Tablet, ER, capsule, solution, injection|ER 15, 30, 60, 100, 200 mg
+Hydromorphone (Dilaudid)|Tablet, solution, injection|2, 4, 8 mg; inj 1, 2, 4 mg/mL
+Oxycodone (OxyContin)|Tablet, ER, solution|IR 5, 10, 15, 20, 30 mg; ER 10–80 mg
+Oxycodone/APAP (Percocet, Roxicet)|Tablet, solution|2.5/325, 5/325, 7.5/325, 10/325 mg
+Fentanyl (Duragesic)|Patch, injection, buccal/nasal|Patch 12, 25, 50, 75, 100 mcg/hr
+Hydrocodone/APAP (Vicodin, Norco)|Tablet, solution|5/325, 7.5/325, 10/325 mg
+Buprenorphine/naloxone (Suboxone)|Sublingual film/tablet|2/0.5, 4/1, 8/2, 12/3 mg
+Codeine/APAP (Tylenol #3/#4)|Tablet|#3 300/30 mg; #4 300/60 mg
+Tramadol (Ultram)|Tablet, ER|50 mg; ER 100, 200, 300 mg`,
+"Pain / Inflammation":`Meloxicam (Mobic)|Tablet, suspension|7.5, 15 mg
+Naproxen (Naprosyn, Aleve)|Tablet, DR, suspension|220, 250, 375, 500 mg
+Ibuprofen (Advil, Motrin)|Tablet, capsule, suspension, injection|200, 400, 600, 800 mg
+Diclofenac (Voltaren)|Tablet, ER, gel, patch, solution|25, 50, 75 mg; topical varies
+Celecoxib (Celebrex)|Capsule|50, 100, 200, 400 mg`,
+"Muscle Spasms / Nerve Pain":`Carisoprodol (Soma)|Tablet|250, 350 mg
+Cyclobenzaprine (Flexeril)|Tablet, ER capsule|5, 7.5, 10 mg; ER 15, 30 mg
+Gabapentin (Neurontin)|Capsule, tablet, solution|100, 300, 400, 600, 800 mg; soln 250 mg/5 mL
+Pregabalin (Lyrica)|Capsule, solution, ER tablet|25, 50, 75, 100, 150, 200, 225, 300 mg
+Lidocaine patch (Lidoderm)|Topical patch|5%`,
+"Alzheimer's / Memory":`Donepezil (Aricept)|Tablet, ODT|5, 10, 23 mg
+Memantine (Namenda XR)|ER capsule|7, 14, 21, 28 mg`,
+"Smoking Cessation":`Nicotine patch (Nicoderm CQ)|Transdermal patch|7, 14, 21 mg/24 hr
+Varenicline (Chantix)|Tablet|0.5, 1 mg`,
+"Mental Health / Sleep / ADHD":`Olanzapine (Zyprexa)|Tablet, ODT, injection|2.5, 5, 7.5, 10, 15, 20 mg
+Quetiapine (Seroquel)|Tablet, ER|25, 50, 100, 200, 300, 400 mg
+Risperidone (Risperdal)|Tablet, ODT, solution, injection|0.25, 0.5, 1, 2, 3, 4 mg
+Ziprasidone (Geodon)|Capsule, injection|20, 40, 60, 80 mg
+Aripiprazole (Abilify)|Tablet, ODT, solution, injection|2, 5, 10, 15, 20, 30 mg
+Clonazepam (Klonopin)|Tablet, ODT|0.5, 1, 2 mg
+Lorazepam (Ativan)|Tablet, concentrate, injection|0.5, 1, 2 mg
+Diazepam (Valium)|Tablet, solution, rectal gel, injection|2, 5, 10 mg
+Alprazolam (Xanax)|Tablet, ODT, ER|0.25, 0.5, 1, 2 mg
+Fluoxetine (Prozac)|Capsule, tablet, liquid|10, 20, 40 mg; liquid 20 mg/5 mL
+Sertraline (Zoloft)|Tablet, solution|25, 50, 100 mg
+Paroxetine (Paxil)|Tablet, ER, suspension|10, 20, 30, 40 mg; ER 12.5, 25, 37.5 mg
+Citalopram (Celexa)|Tablet, solution|10, 20, 40 mg
+Escitalopram (Lexapro)|Tablet, solution|5, 10, 20 mg
+Venlafaxine (Effexor/XR)|Tablet, ER capsule|25, 37.5, 50, 75, 100 mg; ER 37.5–225 mg
+Desvenlafaxine (Pristiq)|ER tablet|25, 50, 100 mg
+Duloxetine (Cymbalta)|DR capsule|20, 30, 60 mg
+Zolpidem (Ambien)|Tablet, ER, sublingual|5, 10 mg; ER 6.25, 12.5 mg
+Eszopiclone (Lunesta)|Tablet|1, 2, 3 mg
+Amitriptyline (Elavil)|Tablet|10, 25, 50, 75, 100, 150 mg
+Nortriptyline (Pamelor)|Capsule, solution|10, 25, 50, 75 mg
+Trazodone (Desyrel)|Tablet|50, 100, 150 mg
+Mirtazapine (Remeron)|Tablet, ODT|7.5, 15, 30, 45 mg
+Bupropion (Wellbutrin)|Tablet, SR/XL|75, 100 mg; SR 100, 150, 200; XL 150, 300 mg
+Methylphenidate (Ritalin, Concerta)|Tablet, ER, solution|5–54 mg by formulation
+Amphetamine/dextroamphetamine (Adderall)|Tablet, ER capsule|5, 7.5, 10, 12.5, 15, 20, 30 mg
+Lisdexamfetamine (Vyvanse)|Capsule, chewable|10, 20, 30, 40, 50, 60, 70 mg
+Atomoxetine (Strattera)|Capsule|10, 18, 25, 40, 60, 80, 100 mg
+Modafinil (Provigil)|Tablet|100, 200 mg`,
+"Diabetes":`Metformin (Glucophage)|Tablet, ER, solution|500, 850, 1000 mg
+Sitagliptin (Januvia)|Tablet|25, 50, 100 mg
+Glyburide (DiaBeta, Glynase)|Tablet|1.25, 2.5, 5 mg
+Glimepiride (Amaryl)|Tablet|1, 2, 4 mg
+Glipizide (Glucotrol)|Tablet, ER|5, 10 mg; ER 2.5, 5, 10 mg
+Glyburide/metformin (Glucovance)|Tablet|1.25/250, 2.5/500, 5/500 mg
+Sitagliptin/metformin (Janumet)|Tablet, XR|50/500, 50/1000 mg
+Rosiglitazone (Avandia)|Tablet|2, 4, 8 mg
+Pioglitazone (Actos)|Tablet|15, 30, 45 mg
+Canagliflozin (Invokana)|Tablet|100, 300 mg
+Insulin aspart (NovoLOG)|Pen/vial|U-100
+Insulin lispro (HumaLOG)|Pen/vial|U-100; U-200 pen
+Insulin NPH (Humulin N, Novolin N)|Injection|U-100
+Insulin glargine (Lantus)|Pen/vial|U-100; others U-300
+Insulin detemir (Levemir)|Pen/vial|U-100
+Exenatide (Byetta)|Injection pen|5, 10 mcg/dose`,
+"Birth Control":`Norgestimate/ethinyl estradiol (Sprintec)|Tablet|0.25 mg/35 mcg
+Drospirenone/ethinyl estradiol (Yaz, Yasmin)|Tablet|Yaz 3 mg/0.02 mg; Yasmin 3 mg/0.03 mg
+Norethindrone (Micronor)|Tablet|0.35 mg
+Norelgestromin/ethinyl estradiol (Ortho Evra)|Patch|150 mcg/35 mcg per 24 hr
+Etonogestrel/ethinyl estradiol (NuvaRing)|Vaginal ring|11.7 mg/2.7 mg per ring`,
+"Inflammation / Immune":`Prednisone (Deltasone)|Tablet, solution|1, 2.5, 5, 10, 20, 50 mg
+Methylprednisolone (Medrol)|Tablet, injection|2, 4, 8, 16, 32 mg`,
+"Hormone-related":`Conjugated estrogens (Premarin)|Tablet, cream, injection|0.3, 0.45, 0.625, 0.9, 1.25 mg
+Testosterone (AndroGel)|Gel, injection, patch, buccal|Gel 1%/1.62%; inj varies
+Levothyroxine (Synthroid)|Tablet, capsule, injection|25–300 mcg
+Anastrozole (Arimidex)|Tablet|1 mg
+Tamoxifen (Nolvadex)|Tablet|10, 20 mg`,
+"Urinary / Prostate / Erectile":`Terazosin (Hytrin)|Capsule|1, 2, 5, 10 mg
+Doxazosin (Cardura)|Tablet, ER|1, 2, 4, 8 mg
+Alfuzosin (Uroxatral)|ER tablet|10 mg
+Tamsulosin (Flomax)|Capsule|0.4 mg
+Dutasteride (Avodart)|Capsule|0.5 mg
+Finasteride (Proscar, Propecia)|Tablet|1, 5 mg
+Sildenafil (Viagra)|Tablet, suspension|25, 50, 100 mg
+Vardenafil (Levitra)|Tablet, ODT|2.5, 5, 10, 20 mg
+Tadalafil (Cialis)|Tablet|2.5, 5, 10, 20 mg
+Tolterodine (Detrol)|Tablet, ER capsule|1, 2 mg; ER 2, 4 mg
+Solifenacin (VESIcare)|Tablet, suspension|5, 10 mg
+Darifenacin (Enablex)|ER tablet|7.5, 15 mg`,
+"Osteoporosis":`Risedronate (Actonel)|Tablet|5, 30, 35, 150 mg
+Alendronate (Fosamax)|Tablet, solution|5, 10, 35, 40, 70 mg
+Ibandronate (Boniva)|Tablet, injection|150 mg; inj 3 mg/3 mL
+Raloxifene (Evista)|Tablet|60 mg`,
+"Rheumatoid Arthritis":`Infliximab (Remicade)|IV infusion|100 mg/vial
+Adalimumab (Humira)|SC injection|20, 40, 80 mg
+Etanercept (Enbrel)|SC injection|25, 50 mg
+Methotrexate (Rheumatrex, Trexall)|Tablet, injection|2.5 mg tab; inj varies
+Hydroxychloroquine (Plaquenil)|Tablet|200 mg`,
+"Gout":`Allopurinol (Zyloprim)|Tablet|100, 300 mg
+Colchicine (Colcrys)|Tablet, capsule, solution|0.6 mg`,
+"Allergies":`Diphenhydramine (Benadryl)|Tablet, capsule, liquid, injection|25, 50 mg
+Loratadine (Claritin)|Tablet, ODT, chewable, syrup|10 mg
+Desloratadine (Clarinex)|Tablet, ODT, solution|5 mg; ODT 2.5, 5 mg
+Fexofenadine (Allegra)|Tablet, ODT, suspension|30, 60, 180 mg
+Olopatadine|Nasal spray, eye drops|Nasal 0.6%; eye 0.1%, 0.2%, 0.7%
+Azelastine|Nasal spray, eye drops|Nasal 0.1%, 0.15%; eye 0.05%
+Epinephrine (EpiPen)|Auto-injector|0.1, 0.15, 0.3 mg
+Mometasone (Nasonex)|Nasal spray|50 mcg/spray
+Fluticasone (Flonase)|Nasal spray|50 mcg/spray`,
+"Cough / Cold":`Hydrocodone/chlorpheniramine (Tussionex)|ER suspension|10 mg/8 mg per 5 mL
+Benzonatate (Tessalon Perles)|Capsule|100, 150, 200 mg
+Guaifenesin (Mucinex)|Tablet, ER, liquid|200, 400 mg; ER 600, 1200 mg
+Dextromethorphan|Syrup, lozenge, ER|Commonly 10–30 mg doses
+Pseudoephedrine|Tablet, ER, liquid|30, 60 mg; ER 120, 240 mg`,
+"Eye (Glaucoma / Dry Eye)":`Timolol (Timoptic)|Eye solution/gel|0.25%, 0.5%
+Brimonidine (Alphagan P)|Eye drops|0.1%, 0.15%, 0.2%
+Brimonidine/timolol (Combigan)|Eye drops|0.2%/0.5%
+Dorzolamide (Trusopt)|Eye drops|2%
+Bimatoprost (Lumigan)|Eye drops|0.01%, 0.03%
+Latanoprost (Xalatan)|Eye drops|0.005%
+Travoprost (Travatan Z)|Eye drops|0.004%
+Cyclosporine ophthalmic (Restasis)|Eye drops|0.05%`,
+"Acne":`Adapalene (Differin)|Topical gel/cream/lotion|0.1%, 0.3%
+Isotretinoin (Accutane)|Capsule|10, 20, 30, 40 mg`,
+"Bacterial Infections":`Amoxicillin (Amoxil)|Capsule, tablet, chewable, suspension|125, 250, 400, 500, 875 mg
+Amoxicillin/clavulanate (Augmentin)|Tablet, chewable, suspension|500/125, 875/125 mg; others
+Cephalexin (Keflex)|Capsule, tablet, suspension|250, 500 mg; susp 125 or 250/5 mL
+Cefuroxime (Ceftin)|Tablet, suspension, injection|125, 250, 500 mg
+Cefdinir (Omnicef)|Capsule, suspension|300 mg; susp 125 or 250 mg/5 mL
+Ciprofloxacin (Cipro)|Tablet, ER, suspension, IV|250, 500, 750 mg
+Levofloxacin (Levaquin)|Tablet, solution, injection|250, 500, 750 mg
+Moxifloxacin (Avelox)|Tablet, injection, eye|400 mg; eye 0.5%
+Clarithromycin (Biaxin)|Tablet, ER, suspension|250, 500 mg
+Azithromycin (Zithromax/Z-Pak)|Tablet, suspension, injection|250, 500, 600 mg; susp 100/5, 200/5 mL
+Clindamycin (Cleocin)|Capsule, injection, topical|75, 150, 300 mg
+Doxycycline (Vibramycin)|Capsule, tablet, suspension, injection|20, 50, 75, 100, 150 mg
+Linezolid (Zyvox)|Tablet, suspension, IV|600 mg; susp 100 mg/5 mL
+Nitrofurantoin (Macrobid/Macrodantin)|Capsule|50, 100 mg
+Metronidazole (Flagyl)|Tablet, capsule, suspension, IV|250, 500, 750 mg
+Sulfamethoxazole/trimethoprim (Bactrim)|Tablet, DS, suspension, IV|400/80 mg; DS 800/160 mg`,
+"Fungal Infections":`Fluconazole (Diflucan)|Tablet, suspension, IV|50, 100, 150, 200 mg
+Itraconazole (Sporanox)|Capsule, solution|100 mg; soln 10 mg/mL`,
+"Antiviral / Infectious Disease":`Oseltamivir (Tamiflu)|Capsule, suspension|30, 45, 75 mg
+Acyclovir (Zovirax)|Tablet, capsule, suspension, cream, injection|200, 400, 800 mg
+Valacyclovir (Valtrex)|Tablet|500 mg, 1 g
+Emtricitabine/tenofovir (Truvada)|Tablet|200/300 mg
+Emtricitabine/tenofovir/efavirenz (Atripla)|Tablet|200/300/600 mg
+Emtricitabine/tenofovir/rilpivirine (Complera)|Tablet|200/300/25 mg
+Emtricitabine/tenofovir/elvitegravir/cobicistat (Stribild)|Tablet|200/300/150/150 mg`};
+const items=[];for(const c in D)D[c].split("\n").forEach(l=>{const[n,f,s]=l.split("|");items.push({c,n,f,s})});
+let cat="All";const q=document.getElementById("q"),out=document.getElementById("out"),cnt=document.getElementById("cnt"),chips=document.getElementById("chips");
+["All",...Object.keys(D)].forEach(c=>{const b=document.createElement("button");b.className="chip"+(c=="All"?" on":"");b.textContent=c;b.onclick=()=>{cat=c;[...chips.children].forEach(x=>x.classList.toggle("on",x==b));r()};chips.appendChild(b)});
+const e=s=>s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+function r(){const t=q.value.toLowerCase().trim();const L=items.filter(i=>(cat=="All"||i.c==cat)&&(!t||(i.n+i.f+i.s+i.c).toLowerCase().includes(t)));cnt.textContent=L.length+" medication"+(L.length==1?"":"s");let h="",p="";L.forEach(i=>{if(i.c!=p){if(p)h+="</div>";h+="<h2>"+e(i.c)+'</h2><div class="g">';p=i.c}h+='<div class="c"><b>'+e(i.n)+"</b><i>"+e(i.f)+'</i><span class="s">'+e(i.s)+"</span></div>"});out.innerHTML=h?h+"</div>":'<p class="cnt">No matches.</p>'}
+q.oninput=r;r();
+</script></body></html>
