@@ -23,6 +23,7 @@ h2{font-size:1.05rem;margin:22px 0 8px;color:var(--ac)}
 .c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px}
 .c b{display:block}.c i{font-style:normal;color:var(--mu);font-size:13px;display:block;margin:2px 0 6px}
 .s{display:inline-block;background:color-mix(in srgb,var(--ac) 14%,transparent);color:var(--ac);border-radius:6px;padding:2px 8px;font-size:12.5px;margin:2px 0}
+  .nf{margin:30px 0;padding:20px;text-align:center;border:1px dashed var(--ac);border-radius:12px;color:var(--tx);font-size:16px}
 footer{max-width:1100px;margin:auto;padding:0 16px 30px;color:var(--mu);font-size:12.5px}
 </style></head><body>
 <header><h1>💊 Medication Catalogue</h1><p>Search by drug, brand, form or strength</p></header>
@@ -31,7 +32,7 @@ footer{max-width:1100px;margin:auto;padding:0 16px 30px;color:var(--mu);font-siz
 <footer>For general reference only. Not medical advice; confirm strengths and use with a doctor or pharmacist.</footer>
 <script>
 const D={
-"Heart / BP / Cardiovascular":`Lisinopril (Prinivil, Zestril)|Tablet, oral solution|Dosgae - 2.5, 5, 10, 20, 40 mg
+"Heart / BP / Cardiovascular":`Lisinopril (Prinivil, Zestril)|Tablet, oral solution|2.5, 5, 10, 20, 40 mg
 Lisinopril/HCTZ (Prinzide, Zestoretic)|Tablet|10/12.5, 20/12.5, 20/25 mg
 Enalapril (Vasotec)|Tablet, oral solution|2.5, 5, 10, 20 mg
 Ramipril (Altace)|Capsule|1.25, 2.5, 5, 10 mg
@@ -285,6 +286,6 @@ const items=[];for(const c in D)D[c].split("\n").forEach(l=>{const[n,f,s]=l.spli
 let cat="All";const q=document.getElementById("q"),out=document.getElementById("out"),cnt=document.getElementById("cnt"),chips=document.getElementById("chips");
 ["All",...Object.keys(D)].forEach(c=>{const b=document.createElement("button");b.className="chip"+(c=="All"?" on":"");b.textContent=c;b.onclick=()=>{cat=c;[...chips.children].forEach(x=>x.classList.toggle("on",x==b));r()};chips.appendChild(b)});
 const e=s=>s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
-function r(){const t=q.value.toLowerCase().trim();const L=items.filter(i=>(cat=="All"||i.c==cat)&&(!t||(i.n+i.f+i.s+i.c).toLowerCase().includes(t)));cnt.textContent=L.length+" medication"+(L.length==1?"":"s");let h="",p="";L.forEach(i=>{if(i.c!=p){if(p)h+="</div>";h+="<h2>"+e(i.c)+'</h2><div class="g">';p=i.c}h+='<div class="c"><b>'+e(i.n)+"</b><i>"+e(i.f)+'</i><span class="s">'+e(i.s)+"</span></div>"});out.innerHTML=h?h+"</div>":'<p class="cnt">No matches.</p>'}
+function r(){const t=q.value.toLowerCase().trim();const L=items.filter(i=>(cat=="All"||i.c==cat)&&(!t||(i.n+i.f+i.s+i.c).toLowerCase().includes(t)));cnt.textContent=L.length+" medication"+(L.length==1?"":"s");let h="",p="";L.forEach(i=>{if(i.c!=p){if(p)h+="</div>";h+="<h2>"+e(i.c)+'</h2><div class="g">';p=i.c}h+='<div class="c"><b>'+e(i.n)+"</b><i>"+e(i.f)+'</i><span class="s">Dosage: '+e(i.s)+"</span></div>"});out.innerHTML=h?h+"</div>":'<div class="nf">Don\'t worry if you don\'t find it here – reply to us with what you are looking for.</div>'}
 q.oninput=r;r();
 </script></body></html>
